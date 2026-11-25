@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NUKE SF — Isometric Sim City</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #0b1020; font-family: "Space Grotesk", system-ui, sans-serif; }
+  #app { position: fixed; inset: 0; }
+  canvas { display: block; }
+  .hud { position: fixed; inset: 0; pointer-events: none; z-index: 10; }
+  .topbar { position: absolute; top: 14px; left: 16px; right: 16px; display: flex; gap: 10px; align-items: flex-start; justify-content: space-between; }
+  .title { pointer-events: auto; background: rgba(10,14,26,.78); border: 1px solid rgba(255,255,255,.12); border-radius: 14px; padding: 10px 16px; backdrop-filter: blur(8px); color: #f3f5ff; }
+  .title h1 { margin: 0; font-size: 17px; letter-spacing: .12em; }
+  .title h1 span { color: #ffce54; }
+  .title p { margin: 3px 0 0; font-size: 11px; color: #9aa4c0; letter-spacing: .04em; }
+  .stats { display: flex; gap: 8px; }
+  .stat { pointer-events: auto; min-width: 84px; background: rgba(10,14,26,.78); border: 1px solid rgba(255,255,255,.12); border-radius: 12px; padding: 8px 12px; backdrop-filter: blur(8px); color: #dfe4ff; text-align: center; }
+  .stat b { display: block; font-size: 16px; font-variant-numeric: tabular-nums; }
+  .stat small { font-size: 9px; letter-spacing: .14em; color: #8b94b5; text-transform: uppercase; }
+  .nuke-btn { pointer-events: auto; position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%); font: 700 15px/1 inherit; letter-spacing: .1em; color: #fff; cursor: pointer; border: 0; border-radius: 999px; padding: 16px 34px; background: linear-gradient(180deg,#ff5a3c,#c41e1e); box-shadow: 0 10px 34px rgba(255,64,32,.45), inset 0 1px 0 rgba(255,255,255,.35); transition: transform .12s ease, filter .12s ease; }
+  .nuke-btn:hover { transform: translateX(-50%) scale(1.05); filter: brightness(1.1); }
+  .nuke-btn:active { transform: translateX(-50%) scale(.97); }
+  .nuke-btn:disabled { filter: grayscale(.9) brightness(.6); cursor: not-allowed; transform: translateX(-50%); }
+  .hint { position: absolute; bottom: 24px; right: 18px; font-size: 10px; color: #7d86a8; letter-spacing: .06em; text-align: right; line-height: 1.7; }
+  .overlay { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; flex-direction: column; background: radial-gradient(ellipse at center, rgba(30,4,2,.55), rgba(5,5,10,.88)); backdrop-filter: blur(3px); text-align: center; }
+  .overlay.show { display: flex; }
+  .overlay h2 { font-size: 46px; margin: 0; letter-spacing: .08em; color: #ffd9a0; text-shadow: 0 0 30px rgba(255,120,40,.6); }
+  .overlay p { color: #c7b7a5; margin: 12px 0 26px; font-size: 14px; letter-spacing: .05em; }
+  .overlay button { pointer-events: auto; font: 600 14px/1 inherit; padding: 14px 30px; border-radius: 999px; border: 1px solid rgba(255,255,255,.25); background: rgba(255,255,255,.08); color: #fff; cursor: pointer; letter-spacing: .08em; }
+  .overlay button:hover { background: rgba(255,255,255,.18); }
+  #flash { position: fixed; inset: 0; background: #fff; opacity: 0; pointer-events: none; z-index: 50; }
+  #scanlines { position: fixed; inset: 0; pointer-events: none; z-index: 40; opacity: 0; transition: opacity .4s; background: repeating-linear-gradient(0deg, rgba(255,60,20,.08) 0 2px, transparent 2px 5px); }
+  #scanlines.show { opacity: 1; }
+</style>
+  <script type="module" crossorigin src="./assets/index-C0U303FF.js"></script>
+</head>
+<body>
+<div id="app"></div>
+<div id="flash"></div>
+<div id="scanlines"></div>
+<div class="hud">
+  <div class="topbar">
+    <div class="title">
+      <h1>NUKE <span>SF</span></h1>
+      <p>isometric sim city · bay · bridges · traffic</p>
+    </div>
+    <div class="stats">
+      <div class="stat"><b id="stat-pop">412k</b><small>pop</small></div>
+      <div class="stat"><b id="stat-gdp">$88.4B</b><small>gdp</small></div>
+      <div class="stat"><b id="stat-traffic">63%</b><small>traffic</small></div>
+      <div class="stat"><b id="stat-lives">3</b><small>cities left</small></div>
+    </div>
+  </div>
+  <button class="nuke-btn" id="nukeBtn">☢ NUKE SAN FRANCISCO</button>
+  <div class="hint">drag to orbit · scroll to zoom · N = nukes</div>
+  <div class="overlay" id="overlay">
+    <h2>SAN FRANCISCO</h2>
+    <p id="overlay-sub">population: zero · skyline: aerospace</p>
+    <button id="rebuildBtn">REBUILD CITY</button>
+  </div>
+</div>
+</body>
+</html>
