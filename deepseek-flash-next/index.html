@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NUKE SF — Miniature City</title>
+<style>
+  :root { --panel: rgba(16,20,26,.72); --edge: rgba(255,255,255,.14); }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:100%; height:100%; overflow:hidden; background:#0b1622;
+    font-family:"Avenir Next","Segoe UI",system-ui,sans-serif; color:#eef3f7; }
+  #app { position:fixed; inset:0; }
+  canvas { display:block; }
+
+  /* ---------- HUD ---------- */
+  .hud { position:fixed; z-index:10; user-select:none; -webkit-user-select:none; }
+  #title { top:16px; left:18px; pointer-events:none; }
+  #title h1 { font-size:26px; letter-spacing:4px; font-weight:800;
+    text-shadow:0 2px 10px rgba(0,0,0,.55); }
+  #title h1 span { color:#ffb347; }
+  #title p { font-size:12px; opacity:.85; margin-top:3px; letter-spacing:1px; }
+
+  #hint { bottom:14px; left:50%; transform:translateX(-50%); font-size:12px;
+    background:var(--panel); border:1px solid var(--edge); padding:7px 14px;
+    border-radius:20px; backdrop-filter:blur(8px); letter-spacing:.4px;
+    pointer-events:none; white-space:nowrap; }
+
+  #stats { top:16px; right:18px; background:var(--panel); border:1px solid var(--edge);
+    border-radius:12px; padding:10px 14px; font-size:12px; line-height:1.75;
+    backdrop-filter:blur(8px); min-width:158px; }
+  #stats b { color:#ffd166; font-variant-numeric:tabular-nums; }
+
+  /* ---------- nuke panel ---------- */
+  #panel { bottom:18px; right:18px; display:flex; flex-direction:column; gap:10px; align-items:flex-end; }
+  .yields { display:flex; gap:6px; background:var(--panel); border:1px solid var(--edge);
+    padding:6px; border-radius:12px; backdrop-filter:blur(8px); }
+  .yield { font-size:11px; letter-spacing:.5px; padding:7px 10px; border-radius:8px;
+    border:1px solid transparent; background:transparent; color:#cfd8e0; cursor:pointer; }
+  .yield.sel { background:#3a2b17; border-color:#ffb347; color:#ffd166; }
+  #nukeBtn { pointer-events:auto; font-size:21px; font-weight:900; letter-spacing:3px;
+    padding:15px 34px; border-radius:16px; border:2px solid #ff8a5c; cursor:pointer;
+    color:#fff; background:linear-gradient(180deg,#ff5a3c,#c81e1e);
+    box-shadow:0 6px 24px rgba(255,60,20,.45), inset 0 1px 0 rgba(255,255,255,.35);
+    transition:transform .12s ease, box-shadow .12s ease; }
+  #nukeBtn:hover { transform:scale(1.05); }
+  #nukeBtn.armed { animation:pulse .9s infinite alternate; background:linear-gradient(180deg,#ff8a3c,#e01616); }
+  @keyframes pulse { from { box-shadow:0 6px 24px rgba(255,60,20,.45); }
+                    to   { box-shadow:0 6px 44px rgba(255,120,40,.95); } }
+  #muteBtn { pointer-events:auto; font-size:15px; background:var(--panel); color:#eef3f7;
+    border:1px solid var(--edge); border-radius:10px; padding:6px 11px; cursor:pointer; }
+
+  /* ---------- overlays ---------- */
+  #flash { position:fixed; inset:0; background:#fff; opacity:0; pointer-events:none; z-index:40; }
+  #shock { position:fixed; inset:0; opacity:0; pointer-events:none; z-index:35; mix-blend-mode:screen; }
+  #toast { top:64px; left:50%; transform:translateX(-50%); font-size:26px; font-weight:900;
+    letter-spacing:6px; color:#ffd166; text-shadow:0 0 26px rgba(255,120,0,.9), 0 3px 8px #000;
+    opacity:0; transition:opacity .25s; pointer-events:none; }
+
+  /* ---------- intro ---------- */
+  #intro { position:fixed; inset:0; z-index:60; display:flex; align-items:center; justify-content:center;
+    background:radial-gradient(1200px 700px at 50% 40%, #16324a, #070d15); cursor:pointer; }
+  #intro .card { text-align:center; max-width:560px; padding:36px; }
+  #intro h1 { font-size:52px; letter-spacing:8px; font-weight:900; }
+  #intro h1 span { color:#ff5a3c; }
+  #intro p { margin-top:14px; font-size:15px; line-height:1.7; opacity:.9; }
+  #intro .go { margin-top:26px; display:inline-block; padding:13px 40px; border-radius:14px;
+    background:#ff5a3c; font-weight:800; letter-spacing:2px; box-shadow:0 8px 30px rgba(255,90,60,.5); }
+  #intro.hidden { opacity:0; pointer-events:none; transition:opacity .7s; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<div class="hud" id="title">
+  <h1>NUKE&nbsp;<span>SF</span></h1>
+  <p>a miniature san francisco · drag to orbit · scroll to zoom</p>
+</div>
+
+<div class="hud" id="stats">
+  ☢ nukes dropped <b id="nNukes">0</b><br>
+  🏢 buildings leveled <b id="nBldgs">0</b><br>
+  💥 blast radius <b id="nRadius">—</b>
+</div>
+
+<div class="hud" id="panel">
+  <div class="yields" id="yields">
+    <button class="yield" data-r="38">BLOCK<br>BUSTER</button>
+    <button class="yield sel" data-r="90">CITY<br>KILLER</button>
+    <button class="yield" data-r="170">MEGA<br>SUN</button>
+  </div>
+  <button id="nukeBtn">☢ ARM NUKE</button>
+  <button id="muteBtn">🔊 sound on</button>
+</div>
+
+<div class="hud" id="hint">drag orbit · scroll zoom · right-drag pan · N arm nuke · click to fire</div>
+<div class="hud" id="toast"></div>
+<div id="flash"></div>
+<div id="shock"></div>
+
+<div id="intro">
+  <div class="card">
+    <h1>NUKE <span>SF</span></h1>
+    <p>The whole of San Francisco, rendered in itty-bitty 3D — ferries in the bay,
+       traffic on the grid, jets over the Gate, fog on the headlands.<br><br>
+       And one very important button.</p>
+    <div class="go">CLICK TO ENTER THE BAY</div>
+  </div>
+</div>
+
+<script type="importmap">
+{ "imports": {
+    "three": "./vendor/three.module.js",
+    "three/addons/controls/OrbitControls.js": "./vendor/OrbitControls.js"
+} }
+</script>
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>

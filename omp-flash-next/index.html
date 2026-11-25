@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>NUKE SF — can we nuke it?</title>
+<style>
+  :root { --ink: #16181c; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; overflow: hidden; background: #c8dded; font-family: ui-rounded, "SF Pro Rounded", system-ui, -apple-system, sans-serif; }
+  #c { display: block; }
+  body.nuke #c { cursor: crosshair; }
+
+  #hud { position: fixed; inset: 0; pointer-events: none; z-index: 5; }
+  .card {
+    pointer-events: auto; background: rgba(255,255,255,.94); border-radius: 14px;
+    box-shadow: 0 6px 24px rgba(20,30,45,.18), 0 1px 3px rgba(20,30,45,.12);
+    padding: 12px 16px; backdrop-filter: blur(6px);
+  }
+  #title { position: fixed; top: 16px; left: 16px; max-width: 340px; }
+  #title h1 { font-size: 21px; letter-spacing: -.02em; color: var(--ink); }
+  #title p { font-size: 12.5px; color: #5c6470; margin-top: 3px; line-height: 1.35; }
+
+  #counter { position: fixed; top: 16px; right: 16px; text-align: center; min-width: 128px; }
+  #nukeCount { font-size: 44px; font-weight: 800; line-height: 1; color: #c9463c; font-variant-numeric: tabular-nums; letter-spacing: -.03em; }
+  #counter .lbl { font-size: 10.5px; font-weight: 700; letter-spacing: .14em; color: #8a919c; margin-top: 4px; }
+
+  #bar { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; align-items: center; pointer-events: auto; }
+  button { font-family: inherit; border: 0; cursor: pointer; border-radius: 12px; transition: transform .08s ease, background .15s ease; }
+  button:active { transform: scale(.96); }
+  #nukeToggle {
+    padding: 13px 20px; font-size: 15px; font-weight: 800; letter-spacing: .02em;
+    background: rgba(255,255,255,.94); color: var(--ink); box-shadow: 0 6px 24px rgba(20,30,45,.18);
+  }
+  #nukeToggle.active { background: #c9463c; color: #fff; box-shadow: 0 0 0 3px rgba(201,70,60,.3), 0 6px 24px rgba(201,70,60,.4); }
+  #bigBtn {
+    width: 74px; height: 74px; border-radius: 50%; font-size: 30px; color: #fff;
+    background: radial-gradient(circle at 35% 30%, #ff8a75, #d63b2c 60%, #9c2115);
+    box-shadow: 0 8px 0 #6e150c, 0 14px 30px rgba(150,30,20,.5), inset 0 2px 6px rgba(255,255,255,.5);
+    margin-left: 8px;
+  }
+  #bigBtn:hover { filter: brightness(1.08); }
+  #hint { position: fixed; bottom: 106px; left: 50%; transform: translateX(-50%); font-size: 12px; color: #4d5a68; background: rgba(255,255,255,.7); padding: 5px 12px; border-radius: 999px; }
+
+  #vig { position: fixed; inset: 0; pointer-events: none; opacity: 0; transition: opacity .25s ease; z-index: 4;
+    background: radial-gradient(ellipse at center, transparent 55%, rgba(214,59,44,.28) 100%); }
+
+  #boot { position: fixed; inset: 0; display: grid; place-items: center; background: #c8dded; z-index: 20; font-size: 15px; color: #37414e; transition: opacity .4s ease; }
+</style>
+<script type="importmap">
+{ "imports": { "three": "./vendor/three.module.min.js" } }
+</script>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="vig"></div>
+<div id="hud">
+  <div class="card" id="title">
+    <h1>can we nuke it?</h1>
+    <p>a tiny San Francisco in your browser — cars, boats, planes, clouds.<br/>press <b>N</b> for nuke mode, then click anywhere. or just hit the button.</p>
+  </div>
+  <div class="card" id="counter">
+    <div id="nukeCount">00</div>
+    <div class="lbl">☢ NUKES DROPPED</div>
+  </div>
+  <div id="hint">drag to orbit · scroll to zoom · right-drag to pan</div>
+  <div id="bar">
+    <button id="nukeToggle">☢ NUKE MODE&nbsp;·&nbsp;N</button>
+    <button id="bigBtn" title="drop one on the Financial District">☢</button>
+  </div>
+</div>
+<div id="boot">building San Francisco…</div>
+<script type="module">
+  import('./src/main.js').then(() => {
+    const b = document.getElementById('boot');
+    b.style.opacity = 0; setTimeout(() => b.remove(), 450);
+  });
+</script>
+</body>
+</html>
